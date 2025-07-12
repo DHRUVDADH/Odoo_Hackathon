@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 180 60% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 180 60% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 180 60% 20%;
+    --primary: 180 60% 20%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 160 100% 38%;
+    --secondary-foreground: 180 60% 20%;
+    --muted: 180 20% 96%;
+    --muted-foreground: 180 40% 40%;
+    --accent: 50 100% 70%;
+    --accent-foreground: 180 60% 20%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 180 20% 90%;
+    --input: 180 20% 90%;
+    --ring: 180 60% 20%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 160 100% 38%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 180 60% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 100%;
+    --accent: 50 100% 70%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 0%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 160 100% 38%;
+  }
+
+  .dark p {
+    color: white;
+  }
+
+  .dark .text-muted-foreground {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, #156064 0%, #00c49a 50%, #f8e16c 100%);
+}
+
+.glass-effect {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-effect {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
