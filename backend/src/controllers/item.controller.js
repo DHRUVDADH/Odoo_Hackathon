@@ -146,7 +146,7 @@ const getItems = async (req, res) => {
       minPrice,
       maxPrice,
       search,
-      status = "active",
+      status = "approved", // changed from 'active' to 'approved'
     } = req.query;
 
     // Build filter object
@@ -175,7 +175,8 @@ const getItems = async (req, res) => {
     }
 
     // Combine filters
-    const finalFilter = { ...filter, ...searchQuery };
+    const finalFilter = { status: "approved" }; // Force only approved items
+    console.log("Item filter (forced):", finalFilter); // Debug log
 
     // Calculate pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
