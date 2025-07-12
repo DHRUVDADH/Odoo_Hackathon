@@ -23,29 +23,96 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "react-hot-toast";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const { user, loading: authLoading } = useAuth();
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [redeemLoading, setRedeemLoading] = useState(false);
+  const [swapLoading, setSwapLoading] = useState(false);
+  const [swapModalOpen, setSwapModalOpen] = useState(false);
+  const [myItems, setMyItems] = useState<Item[]>([]);
+  const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+
+  // Helper to fetch item data
+  const fetchItem = async () => {
+    setLoading(true);
+    try {
+      const res = await apiClient.getItem(id as string);
+      if (res.success && res.data) {
+        setItem(res.data.item);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
-    const fetchItem = async () => {
-      setLoading(true);
-      try {
-        const res = await apiClient.getItem(id as string);
-        if (res.success && res.data) {
-          setItem(res.data.item);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchItem();
   }, [id]);
+
+  // Fetch user's items for swap
+  useEffect(() => {
+    if (!user) return;
+    const fetchMyItems = async () => {
+      const res = await apiClient.getUserItems(user._id);
+      if (res.success && res.data) {
+        setMyItems(
+          res.data.items.filter((i) => i.status === "approved" && i._id !== id)
+        );
+      }
+    };
+    fetchMyItems();
+  }, [user, id]);
+
+  const handleRedeem = async () => {
+    if (!item) return;
+    setRedeemLoading(true);
+    try {
+      const res = await apiClient.redeemItem(item._id);
+      if (res.success) {
+        toast.success("Item redeemed successfully!");
+        await fetchItem(); // Refresh item data after redeem
+      } else {
+        toast.error(res.message || "Failed to redeem item");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to redeem item");
+    } finally {
+      setRedeemLoading(false);
+    }
+  };
+
+  const handleOpenSwapModal = () => {
+    setSwapModalOpen(true);
+  };
+
+  const handleRequestSwap = async () => {
+    if (!item || !selectedOfferId) return;
+    setSwapLoading(true);
+    try {
+      const res = await apiClient.requestSwap(item._id, selectedOfferId);
+      if (res.success) {
+        toast.success("Swap request sent!");
+        setSwapModalOpen(false);
+        setSelectedOfferId(null);
+        await fetchItem(); // Refresh item data after swap
+      } else {
+        toast.error(res.message || "Failed to request swap");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to request swap");
+    } finally {
+      setSwapLoading(false);
+    }
+  };
 
   if (loading) return <p>Loading item...</p>;
   if (!item) return <p>Item not found.</p>;
@@ -62,7 +129,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar isAuthenticated={true} userPoints={125} />
+      <Navbar isAuthenticated={!!user} userPoints={user?.points || 0} />
 
       <div className="container py-8">
         {/* Breadcrumb */}
@@ -195,7 +262,14 @@ export default function ProductDetailPage() {
 
             {/* Action Buttons */}
             <div className="flex space-x-4">
-              <Button size="lg" className="flex-1">
+              <Button
+                size="lg"
+                className="flex-1"
+                onClick={handleOpenSwapModal}
+                disabled={
+                  !user || myItems.length === 0 || item?.status !== "approved"
+                }
+              >
                 <MessageCircle className="mr-2 h-5 w-5" />
                 Request Swap
               </Button>
@@ -203,11 +277,72 @@ export default function ProductDetailPage() {
                 size="lg"
                 variant="outline"
                 className="flex-1 bg-transparent"
+                onClick={handleRedeem}
+                disabled={
+                  !user ||
+                  redeemLoading ||
+                  (user && user.points < (item?.price || 0)) ||
+                  item?.status !== "approved"
+                }
               >
                 <Star className="mr-2 h-5 w-5" />
-                Redeem with Points
+                {redeemLoading ? "Redeeming..." : "Redeem with Points"}
               </Button>
             </div>
+            {/* Swap Modal */}
+            <Dialog open={swapModalOpen} onOpenChange={setSwapModalOpen}>
+              <DialogContent>
+                <DialogTitle>Select an item to offer for swap</DialogTitle>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {myItems.length === 0 ? (
+                    <p>You have no items available for swap.</p>
+                  ) : (
+                    myItems.map((myItem) => (
+                      <div
+                        key={myItem._id}
+                        className={`flex items-center p-2 border rounded cursor-pointer ${
+                          selectedOfferId === myItem._id
+                            ? "border-primary bg-muted"
+                            : "border-gray-200"
+                        }`}
+                        onClick={() => setSelectedOfferId(myItem._id)}
+                      >
+                        <Image
+                          src={myItem.images[0]?.url || "/placeholder.svg"}
+                          alt={myItem.title}
+                          width={48}
+                          height={48}
+                          className="rounded mr-2"
+                        />
+                        <div className="flex-1">
+                          <div className="font-semibold">{myItem.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {myItem.category} • {myItem.price} pts
+                          </div>
+                        </div>
+                        {selectedOfferId === myItem._id && (
+                          <span className="ml-2 text-primary">Selected</span>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className="flex justify-end mt-4 space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setSwapModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleRequestSwap}
+                    disabled={!selectedOfferId || swapLoading}
+                  >
+                    {swapLoading ? "Requesting..." : "Request Swap"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {/* Item Details */}
             <Card>
@@ -322,7 +457,7 @@ export default function ProductDetailPage() {
               </div>
               <div className="flex items-center space-x-1">
                 <Shield className="h-4 w-4" />
-                <span>ReWear Protected</span>
+                <span>ClosetLoop Protected</span>
               </div>
             </div>
           </div>

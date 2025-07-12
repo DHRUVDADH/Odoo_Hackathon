@@ -316,6 +316,24 @@ class ApiClient {
     });
   }
 
+  // Request a swap between two items
+  async requestSwap(
+    requestedItemId: string,
+    offeredItemId: string
+  ): Promise<ApiResponse<{ swap: any }>> {
+    return this.request<{ swap: any }>(`/swaps/request`, {
+      method: "POST",
+      body: JSON.stringify({ requestedItemId, offeredItemId }),
+    });
+  }
+
+  // Redeem an item with points
+  async redeemItem(itemId: string): Promise<ApiResponse<{ item: Item }>> {
+    return this.request<{ item: Item }>(`/items/${itemId}/redeem`, {
+      method: "POST",
+    });
+  }
+
   // User Methods
   async getUser(id: string): Promise<ApiResponse<{ user: User }>> {
     return this.request<{ user: User }>(`/users/${id}`);
@@ -328,6 +346,32 @@ class ApiClient {
   // Health Check
   async healthCheck(): Promise<ApiResponse> {
     return this.request("/health");
+  }
+
+  // Get swaps where the user is the recipient and status is pending
+  async getMySwapRequests(): Promise<ApiResponse<{ swaps: any[] }>> {
+    return this.request<{ swaps: any[] }>(
+      `/swaps?role=recipient&status=pending`
+    );
+  }
+
+  // Accept a swap by ID
+  async acceptSwap(swapId: string): Promise<ApiResponse<{ swap: any }>> {
+    return this.request<{ swap: any }>(`/swaps/${swapId}/accept`, {
+      method: "POST",
+    });
+  }
+
+  // Reject a swap by ID
+  async rejectSwap(swapId: string): Promise<ApiResponse<{ swap: any }>> {
+    return this.request<{ swap: any }>(`/swaps/${swapId}/reject`, {
+      method: "POST",
+    });
+  }
+
+  // Get swaps where the user is the requester (outgoing swaps)
+  async getOutgoingSwapRequests(): Promise<ApiResponse<{ swaps: any[] }>> {
+    return this.request<{ swaps: any[] }>(`/swaps?role=requester`);
   }
 }
 

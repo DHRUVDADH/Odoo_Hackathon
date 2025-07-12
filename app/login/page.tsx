@@ -64,7 +64,7 @@ export default function LoginPage() {
             <div>
               <h1 className="text-3xl font-bold">Welcome back</h1>
               <p className="text-muted-foreground">
-                Sign in to your ReWear account
+                Sign in to your ClosetLoop account
               </p>
             </div>
           </div>

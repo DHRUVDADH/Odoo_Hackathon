@@ -89,6 +89,7 @@ const itemSchema = new mongoose.Schema(
         "sold",
         "expired",
         "flagged",
+        "redeemed", // Added to allow marking items as redeemed
       ],
       default: "pending",
     },

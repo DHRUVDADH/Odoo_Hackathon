@@ -1,24 +1,27 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { Recycle, User, Settings, LogOut } from "lucide-react"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Recycle, User, Settings, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NavbarProps {
-  isAuthenticated?: boolean
-  userPoints?: number
+  isAuthenticated?: boolean;
+  userPoints?: number;
 }
 
-export function Navbar({ isAuthenticated = false, userPoints = 0 }: NavbarProps) {
+export function Navbar({
+  isAuthenticated = false,
+  userPoints = 0,
+}: NavbarProps) {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -26,7 +29,7 @@ export function Navbar({ isAuthenticated = false, userPoints = 0 }: NavbarProps)
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Recycle className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold">ReWear</span>
+          <span className="text-xl font-bold">ClosetLoop</span>
         </Link>
 
         <div className="flex items-center space-x-4">
@@ -41,7 +44,10 @@ export function Navbar({ isAuthenticated = false, userPoints = 0 }: NavbarProps)
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="/placeholder.svg" alt="User" />
                       <AvatarFallback>JD</AvatarFallback>
@@ -82,5 +88,5 @@ export function Navbar({ isAuthenticated = false, userPoints = 0 }: NavbarProps)
         </div>
       </div>
     </nav>
-  )
+  );
 }

@@ -284,14 +284,9 @@ export default function AdminPanel() {
 
         {/* Main Content */}
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="pending">
-              Pending Reviews ({adminStats.pendingReviews})
-            </TabsTrigger>
-            <TabsTrigger value="flagged">
-              Flagged Items ({adminStats.flaggedItems})
-            </TabsTrigger>
-            <TabsTrigger value="users">User Management</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="pending">Pending Reviews</TabsTrigger>
+            <TabsTrigger value="flagged">Flagged Items</TabsTrigger>
             <TabsTrigger value="activity">Recent Activity</TabsTrigger>
           </TabsList>
 
@@ -542,19 +537,6 @@ export default function AdminPanel() {
                 </Card>
               ))}
             </div>
-          </TabsContent>
-
-          <TabsContent value="users" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>User Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  User management features coming soon...
-                </p>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-6">

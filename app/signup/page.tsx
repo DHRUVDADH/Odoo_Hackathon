@@ -130,7 +130,7 @@ export default function SignUpPage() {
               </div>
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Join ReWear</h1>
+              <h1 className="text-3xl font-bold">Join ClosetLoop</h1>
               <p className="text-muted-foreground">
                 Start your sustainable fashion journey
               </p>

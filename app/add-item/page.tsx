@@ -224,7 +224,7 @@ export default function AddItemPage() {
           <div>
             <h1 className="text-3xl font-bold">Add New Item</h1>
               <p className="text-muted-foreground">
-                Share your pre-loved fashion with the ReWear community
+                Share your pre-loved fashion with the ClosetLoop community
               </p>
           </div>
 
@@ -243,7 +243,7 @@ export default function AddItemPage() {
                       <div className="grid grid-cols-2 gap-4">
                         {imageUrls.map((url, index) => (
                           <div key={index} className="relative aspect-square">
-                            <img
+                        <img
                               src={url}
                               alt={`Preview ${index + 1}`}
                               className="w-full h-full object-cover rounded-lg"

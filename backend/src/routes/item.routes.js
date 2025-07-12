@@ -28,6 +28,9 @@ router.put("/:id", verifyToken, handleImageUpload, itemController.updateItem);
 router.delete("/:id", verifyToken, itemController.deleteItem);
 router.post("/:id/like", verifyToken, itemController.toggleLike);
 
+// Redeem item with points
+router.post("/:id/redeem", verifyToken, itemController.redeemItem);
+
 // User's items
 router.get("/user/:userId", itemController.getUserItems);
 

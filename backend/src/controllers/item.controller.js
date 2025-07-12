@@ -506,6 +506,64 @@ const rejectItem = async (req, res) => {
   }
 };
 
+// Redeem item with points
+const redeemItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    // Find the item
+    const item = await Item.findById(id);
+    if (!item) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: ERROR_MESSAGES.ITEM_NOT_FOUND,
+      });
+    }
+
+    // Check if item is already redeemed or not approved
+    if (item.status !== "approved") {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: "Item is not available for redemption.",
+      });
+    }
+
+    // Check if user has enough points
+    if (req.user.points < item.price) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: "Insufficient points to redeem this item.",
+      });
+    }
+
+    // Deduct points from user
+    await User.findByIdAndUpdate(userId, { $inc: { points: -item.price } });
+
+    // Update item status and owner
+    item.status = "redeemed";
+    item.owner = userId;
+    await item.save();
+
+    // Optionally, increment itemsSold for previous owner
+    await User.findByIdAndUpdate(item.owner, {
+      $inc: { "stats.itemsSold": 1 },
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: "Item redeemed successfully.",
+      data: { item },
+    });
+  } catch (error) {
+    console.error("Redeem item error:", error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+    });
+  }
+};
+
 module.exports = {
   createItem,
   getItems,
@@ -517,4 +575,5 @@ module.exports = {
   getPendingItems,
   approveItem,
   rejectItem,
+  redeemItem,
 };
