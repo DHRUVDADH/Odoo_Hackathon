@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,10 +38,89 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useAuth } from "@/hooks/useAuth";
+import { apiClient, Item } from "@/lib/api";
 
 export default function AdminPanel() {
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [pendingItems, setPendingItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null); // itemId for which action is loading
+  const [rejectReason, setRejectReason] = useState<{ [id: string]: string }>(
+    {}
+  );
+
+  // Fetch pending items (force on mount for debugging)
+  useEffect(() => {
+    console.log("Fetching pending items (debug)");
+    fetchPendingItems();
+    // eslint-disable-next-line
+  }, []);
+
+  const fetchPendingItems = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await apiClient.getPendingItems();
+      if (res.success && res.data) {
+        setPendingItems(res.data.items);
+      } else {
+        setError(res.message || "Failed to fetch pending items");
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch pending items");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApprove = async (itemId: string) => {
+    setActionLoading(itemId);
+    try {
+      await apiClient.approveItem(itemId);
+      setPendingItems((items) => items.filter((item) => item._id !== itemId));
+    } catch (err: any) {
+      alert(err.message || "Failed to approve item");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async (itemId: string) => {
+    setActionLoading(itemId);
+    try {
+      await apiClient.rejectItem(itemId, rejectReason[itemId] || "");
+      setPendingItems((items) => items.filter((item) => item._id !== itemId));
+      setRejectReason((r) => ({ ...r, [itemId]: "" }));
+    } catch (err: any) {
+      alert(err.message || "Failed to reject item");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRemove = (itemId: number) => {
+    console.log(`Removed item ${itemId}`);
+  };
+
+  // Restrict access to logged-in users only (temporarily allow all users)
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        Loading...
+      </div>
+    );
+  }
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-red-600 font-bold">
+        Please log in to access the admin dashboard.
+      </div>
+    );
+  }
 
   const adminStats = {
     totalUsers: 1247,
@@ -50,42 +129,6 @@ export default function AdminPanel() {
     completedSwaps: 1856,
     flaggedItems: 5,
   };
-
-  const pendingItems = [
-    {
-      id: 1,
-      title: "Vintage Leather Jacket",
-      user: "Sarah M.",
-      category: "Outerwear",
-      condition: "Excellent",
-      submittedAt: "2 hours ago",
-      images: ["/placeholder.svg?height=100&width=100"],
-      description: "Classic brown leather jacket in excellent condition...",
-      status: "pending",
-    },
-    {
-      id: 2,
-      title: "Designer Summer Dress",
-      user: "Emma K.",
-      category: "Dresses",
-      condition: "Like New",
-      submittedAt: "4 hours ago",
-      images: ["/placeholder.svg?height=100&width=100"],
-      description: "Beautiful floral summer dress from premium brand...",
-      status: "pending",
-    },
-    {
-      id: 3,
-      title: "Athletic Running Shoes",
-      user: "Mike T.",
-      category: "Shoes",
-      condition: "Good",
-      submittedAt: "6 hours ago",
-      images: ["/placeholder.svg?height=100&width=100"],
-      description: "Lightweight running shoes with minimal wear...",
-      status: "pending",
-    },
-  ];
 
   const flaggedItems = [
     {
@@ -136,18 +179,6 @@ export default function AdminPanel() {
       admin: "Admin",
     },
   ];
-
-  const handleApprove = (itemId: number) => {
-    console.log(`Approved item ${itemId}`);
-  };
-
-  const handleReject = (itemId: number) => {
-    console.log(`Rejected item ${itemId}`);
-  };
-
-  const handleRemove = (itemId: number) => {
-    console.log(`Removed item ${itemId}`);
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -291,91 +322,139 @@ export default function AdminPanel() {
 
             {/* Pending Items List */}
             <div className="space-y-4">
-              {pendingItems.map((item) => (
-                <Card
-                  key={item.id}
-                  className="hover:shadow-md transition-shadow"
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <Image
-                        src={item.images[0] || "/placeholder.svg"}
-                        alt={item.title}
-                        width={100}
-                        height={100}
-                        className="rounded-lg object-cover"
-                      />
+              {loading ? (
+                <p>Loading pending items...</p>
+              ) : error ? (
+                <p className="text-red-600">{error}</p>
+              ) : pendingItems.length === 0 ? (
+                <p>No pending items found.</p>
+              ) : (
+                pendingItems.map((item) => (
+                  <Card
+                    key={item._id}
+                    className="hover:shadow-md transition-shadow"
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-start space-x-4">
+                        <Image
+                          src={
+                            item.images && item.images.length > 0
+                              ? item.images[0].url
+                              : "/placeholder.svg"
+                          }
+                          alt={item.title}
+                          width={100}
+                          height={100}
+                          className="rounded-lg object-cover"
+                        />
 
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="font-semibold text-lg">
-                              {item.title}
-                            </h3>
-                            <p className="text-sm text-muted-foreground">
-                              by {item.user}
-                            </p>
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-semibold text-lg">
+                                {item.title}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                by {item.owner?.username || "Unknown User"}
+                              </p>
+                            </div>
+                            <Badge variant="outline">{item.status}</Badge>
                           </div>
-                          <Badge variant="outline">{item.status}</Badge>
+
+                          <p className="text-muted-foreground line-clamp-2">
+                            {item.description}
+                          </p>
+
+                          <div className="flex items-center space-x-4 text-sm">
+                            <Badge variant="secondary">{item.category}</Badge>
+                            <Badge variant="secondary">{item.condition}</Badge>
+                            <span className="text-muted-foreground">
+                              Submitted{" "}
+                              {new Date(item.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
                         </div>
 
-                        <p className="text-muted-foreground line-clamp-2">
-                          {item.description}
-                        </p>
+                        <div className="flex items-center space-x-2">
+                          <Button variant="outline" size="icon">
+                            <Eye className="h-4 w-4" />
+                          </Button>
 
-                        <div className="flex items-center space-x-4 text-sm">
-                          <Badge variant="secondary">{item.category}</Badge>
-                          <Badge variant="secondary">{item.condition}</Badge>
-                          <span className="text-muted-foreground">
-                            Submitted {item.submittedAt}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="icon">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={() => handleApprove(item.id)}
-                        >
-                          <Check className="h-4 w-4 mr-1" />
-                          Approve
-                        </Button>
-
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm">
-                              <X className="h-4 w-4 mr-1" />
-                              Reject
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Reject Item</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to reject "{item.title}"?
-                                This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleReject(item.id)}
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => handleApprove(item._id)}
+                                disabled={actionLoading === item._id}
                               >
+                                <Check className="h-4 w-4 mr-1" />
+                                {actionLoading === item._id
+                                  ? "Approving..."
+                                  : "Approve"}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Approve Item
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to approve "{item.title}
+                                  "? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleApprove(item._id)}
+                                >
+                                  Approve
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() =>
+                                  setRejectReason({
+                                    ...rejectReason,
+                                    [item._id]: "",
+                                  })
+                                }
+                              >
+                                <X className="h-4 w-4 mr-1" />
                                 Reject
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Reject Item</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to reject "{item.title}
+                                  "? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleReject(item._id)}
+                                >
+                                  Reject
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>
 

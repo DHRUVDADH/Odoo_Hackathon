@@ -288,6 +288,33 @@ class ApiClient {
     });
   }
 
+  // ADMIN: Get all pending items
+  async getPendingItems(page = 1, limit = 20) {
+    const endpoint = `/items/admin/pending?page=${page}&limit=${limit}`;
+    return this.request<{
+      items: Item[];
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    }>(endpoint);
+  }
+
+  // ADMIN: Approve item
+  async approveItem(itemId: string) {
+    return this.request<{ item: Item }>(`/items/admin/${itemId}/approve`, {
+      method: "PATCH",
+    });
+  }
+
+  // ADMIN: Reject item
+  async rejectItem(itemId: string, reason: string) {
+    return this.request<{ item: Item }>(`/items/admin/${itemId}/reject`, {
+      method: "PATCH",
+      body: JSON.stringify({ reason }),
+    });
+  }
+
   // User Methods
   async getUser(id: string): Promise<ApiResponse<{ user: User }>> {
     return this.request<{ user: User }>(`/users/${id}`);

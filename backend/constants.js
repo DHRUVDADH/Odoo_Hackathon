@@ -16,57 +16,57 @@ const HTTP_STATUS = {
 };
 
 const USER_ROLES = {
-  USER: 'user',
-  ADMIN: 'admin',
-  MODERATOR: 'moderator',
+  USER: "user",
+  ADMIN: "admin",
+  MODERATOR: "moderator",
 };
 
 const ITEM_STATUS = {
-  PENDING: 'pending',
-  APPROVED: 'approved',
-  REJECTED: 'rejected',
-  ACTIVE: 'active',
-  SOLD: 'sold',
-  EXPIRED: 'expired',
-  FLAGGED: 'flagged',
+  PENDING: "pending",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+  ACTIVE: "active",
+  SOLD: "sold",
+  EXPIRED: "expired",
+  FLAGGED: "flagged",
 };
 
 const SWAP_STATUS = {
-  PENDING: 'pending',
-  ACCEPTED: 'accepted',
-  REJECTED: 'rejected',
-  COMPLETED: 'completed',
-  CANCELLED: 'cancelled',
+  PENDING: "pending",
+  ACCEPTED: "accepted",
+  REJECTED: "rejected",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
 };
 
 const ITEM_CONDITION = {
-  LIKE_NEW: 'Like New',
-  EXCELLENT: 'Excellent',
-  VERY_GOOD: 'Very Good',
-  GOOD: 'Good',
-  FAIR: 'Fair',
-  POOR: 'Poor',
+  LIKE_NEW: "Like New",
+  EXCELLENT: "Excellent",
+  VERY_GOOD: "Very Good",
+  GOOD: "Good",
+  FAIR: "Fair",
+  POOR: "Poor",
 };
 
 const ITEM_CATEGORIES = {
-  TOPS: 'Tops',
-  DRESSES: 'Dresses',
-  OUTERWEAR: 'Outerwear',
-  BOTTOMS: 'Bottoms',
-  SHOES: 'Shoes',
-  ACCESSORIES: 'Accessories',
-  BAGS: 'Bags',
-  JEWELRY: 'Jewelry',
+  TOPS: "Tops",
+  DRESSES: "Dresses",
+  OUTERWEAR: "Outerwear",
+  BOTTOMS: "Bottoms",
+  SHOES: "Shoes",
+  ACCESSORIES: "Accessories",
+  BAGS: "Bags",
+  JEWELRY: "Jewelry",
 };
 
 const ITEM_SIZES = {
-  XS: 'XS',
-  S: 'S',
-  M: 'M',
-  L: 'L',
-  XL: 'XL',
-  XXL: 'XXL',
-  FREE_SIZE: 'Free Size',
+  XS: "XS",
+  S: "S",
+  M: "M",
+  L: "L",
+  XL: "XL",
+  XXL: "XXL",
+  FREE_SIZE: "Free Size",
 };
 
 const POINTS_SYSTEM = {
@@ -81,7 +81,7 @@ const POINTS_SYSTEM = {
 const UPLOAD_LIMITS = {
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
   MAX_FILES: 6,
-  ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+  ALLOWED_IMAGE_TYPES: ["image/jpeg", "image/jpg", "image/png", "image/webp"],
 };
 
 const PAGINATION = {
@@ -96,44 +96,49 @@ const SEARCH = {
 };
 
 const NOTIFICATION_TYPES = {
-  SWAP_REQUEST: 'swap_request',
-  SWAP_ACCEPTED: 'swap_accepted',
-  SWAP_REJECTED: 'swap_rejected',
-  ITEM_APPROVED: 'item_approved',
-  ITEM_REJECTED: 'item_rejected',
-  NEW_MESSAGE: 'new_message',
-  POINTS_EARNED: 'points_earned',
-  SYSTEM_ANNOUNCEMENT: 'system_announcement',
+  SWAP_REQUEST: "swap_request",
+  SWAP_ACCEPTED: "swap_accepted",
+  SWAP_REJECTED: "swap_rejected",
+  ITEM_APPROVED: "item_approved",
+  ITEM_REJECTED: "item_rejected",
+  NEW_MESSAGE: "new_message",
+  POINTS_EARNED: "points_earned",
+  SYSTEM_ANNOUNCEMENT: "system_announcement",
 };
 
 const ERROR_MESSAGES = {
-  INVALID_CREDENTIALS: 'Invalid email or password',
-  USER_NOT_FOUND: 'User not found',
-  ITEM_NOT_FOUND: 'Item not found',
-  UNAUTHORIZED: 'Unauthorized access',
-  FORBIDDEN: 'Access forbidden',
-  VALIDATION_ERROR: 'Validation failed',
-  DUPLICATE_EMAIL: 'Email already exists',
-  DUPLICATE_USERNAME: 'Username already exists',
-  INVALID_TOKEN: 'Invalid or expired token',
-  FILE_TOO_LARGE: 'File size too large',
-  INVALID_FILE_TYPE: 'Invalid file type',
-  RATE_LIMIT_EXCEEDED: 'Too many requests, please try again later',
+  INVALID_CREDENTIALS: "Invalid email or password",
+  USER_NOT_FOUND: "User not found",
+  ITEM_NOT_FOUND: "Item not found",
+  UNAUTHORIZED: "Unauthorized access",
+  FORBIDDEN: "Access forbidden",
+  VALIDATION_ERROR: "Validation failed",
+  DUPLICATE_EMAIL: "Email already exists",
+  DUPLICATE_USERNAME: "Username already exists",
+  INVALID_TOKEN: "Invalid or expired token",
+  FILE_TOO_LARGE: "File size too large",
+  INVALID_FILE_TYPE: "Invalid file type",
+  RATE_LIMIT_EXCEEDED: "Too many requests, please try again later",
+  INTERNAL_SERVER_ERROR: "Internal server error",
 };
 
 const SUCCESS_MESSAGES = {
-  USER_CREATED: 'User created successfully',
-  USER_UPDATED: 'User updated successfully',
-  USER_DELETED: 'User deleted successfully',
-  ITEM_CREATED: 'Item created successfully',
-  ITEM_UPDATED: 'Item updated successfully',
-  ITEM_DELETED: 'Item deleted successfully',
-  SWAP_CREATED: 'Swap request created successfully',
-  SWAP_UPDATED: 'Swap updated successfully',
-  LOGIN_SUCCESS: 'Login successful',
-  LOGOUT_SUCCESS: 'Logout successful',
-  PASSWORD_RESET: 'Password reset email sent',
-  EMAIL_VERIFIED: 'Email verified successfully',
+  USER_CREATED: "User created successfully",
+  USER_UPDATED: "User updated successfully",
+  USER_DELETED: "User deleted successfully",
+  ITEM_CREATED: "Item created successfully",
+  ITEM_UPDATED: "Item updated successfully",
+  ITEM_DELETED: "Item deleted successfully",
+  ITEM_FETCHED: "Item fetched successfully",
+  ITEMS_FETCHED: "Items fetched successfully",
+  ITEM_LIKED: "Item liked successfully",
+  ITEM_UNLIKED: "Item unliked successfully",
+  SWAP_CREATED: "Swap request created successfully",
+  SWAP_UPDATED: "Swap updated successfully",
+  LOGIN_SUCCESS: "Login successful",
+  LOGOUT_SUCCESS: "Logout successful",
+  PASSWORD_RESET: "Password reset email sent",
+  EMAIL_VERIFIED: "Email verified successfully",
 };
 
 module.exports = {
@@ -151,4 +156,4 @@ module.exports = {
   NOTIFICATION_TYPES,
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
-}; 
+};
