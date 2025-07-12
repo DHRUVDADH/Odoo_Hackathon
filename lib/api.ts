@@ -75,6 +75,7 @@ export interface Item {
   isSwapOnly: boolean;
   createdAt: string;
   updatedAt: string;
+  measurements?: Record<string, string | number>;
 }
 
 // API Client Class
@@ -321,7 +322,7 @@ class ApiClient {
   }
 
   async getUserItems(userId: string): Promise<ApiResponse<{ items: Item[] }>> {
-    return this.request<{ items: Item[] }>(`/users/${userId}/items`);
+    return this.request<{ items: Item[] }>(`/items/user/${userId}`);
   }
 
   // Health Check

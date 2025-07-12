@@ -205,41 +205,41 @@ export default function AddItemPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
         <Navbar isAuthenticated={true} userPoints={user?.points || 0} />
 
-        <div className="container py-8 max-w-4xl">
-          {/* Header */}
-          <div className="flex items-center space-x-4 mb-8">
+      <div className="container py-8 max-w-4xl">
+        {/* Header */}
+        <div className="flex items-center space-x-4 mb-8">
             <Link
               href="/dashboard"
               className="flex items-center text-muted-foreground hover:text-foreground"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Link>
-          </div>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Link>
+        </div>
 
-          <div className="space-y-8">
-            <div>
-              <h1 className="text-3xl font-bold">Add New Item</h1>
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-3xl font-bold">Add New Item</h1>
               <p className="text-muted-foreground">
                 Share your pre-loved fashion with the ReWear community
               </p>
-            </div>
+          </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-8">
                 {/* Image Upload */}
                 <div className="lg:col-span-1">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Photos</CardTitle>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Photos</CardTitle>
                       <CardDescription>
                         Add up to 6 photos of your item
                       </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                </CardHeader>
+                <CardContent className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         {imageUrls.map((url, index) => (
                           <div key={index} className="relative aspect-square">
@@ -247,18 +247,18 @@ export default function AddItemPage() {
                               src={url}
                               alt={`Preview ${index + 1}`}
                               className="w-full h-full object-cover rounded-lg"
-                            />
-                            <Button
+                        />
+                        <Button
                               type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="absolute top-2 right-2 h-6 w-6"
-                              onClick={() => removeImage(index)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ))}
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 h-6 w-6"
+                          onClick={() => removeImage(index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
                         {imageUrls.length < 6 && (
                           <div className="aspect-square border-2 border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center">
                             <label className="cursor-pointer w-full h-full flex flex-col items-center justify-center space-y-2">
@@ -273,15 +273,15 @@ export default function AddItemPage() {
                                 className="hidden"
                                 onChange={handleImageUpload}
                               />
-                            </label>
-                          </div>
-                        )}
+                      </label>
+                    </div>
+                  )}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Upload clear, well-lit photos from multiple angles
                       </p>
-                    </CardContent>
-                  </Card>
+                </CardContent>
+              </Card>
 
                   {/* Tags */}
                   <Card className="mt-6">
@@ -342,44 +342,44 @@ export default function AddItemPage() {
                     </Alert>
                   )}
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Basic Information</CardTitle>
-                      <CardDescription>Tell us about your item</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="title">Title *</Label>
-                        <Input
-                          id="title"
-                          placeholder="e.g., Vintage Denim Jacket"
-                          value={formData.title}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Basic Information</CardTitle>
+                  <CardDescription>Tell us about your item</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      placeholder="e.g., Vintage Denim Jacket"
+                      value={formData.title}
                           onChange={(e) =>
                             handleInputChange("title", e.target.value)
                           }
                           required
                           disabled={isLoading}
-                        />
-                      </div>
+                    />
+                  </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="description">Description *</Label>
-                        <Textarea
-                          id="description"
-                          placeholder="Describe the item's condition, style, and any special features..."
-                          rows={4}
-                          value={formData.description}
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description *</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Describe the item's condition, style, and any special features..."
+                      rows={4}
+                      value={formData.description}
                           onChange={(e) =>
                             handleInputChange("description", e.target.value)
                           }
                           required
                           disabled={isLoading}
-                        />
-                      </div>
+                    />
+                  </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="category">Category *</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Category *</Label>
                           <Select
                             value={formData.category}
                             onValueChange={(value) =>
@@ -387,10 +387,10 @@ export default function AddItemPage() {
                             }
                             disabled={isLoading}
                           >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                            <SelectContent>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
                               <SelectItem value="Tops">Tops</SelectItem>
                               <SelectItem value="Dresses">Dresses</SelectItem>
                               <SelectItem value="Outerwear">
@@ -403,12 +403,12 @@ export default function AddItemPage() {
                               </SelectItem>
                               <SelectItem value="Bags">Bags</SelectItem>
                               <SelectItem value="Jewelry">Jewelry</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="size">Size *</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="size">Size *</Label>
                           <Select
                             value={formData.size}
                             onValueChange={(value) =>
@@ -416,10 +416,10 @@ export default function AddItemPage() {
                             }
                             disabled={isLoading}
                           >
-                            <SelectTrigger>
+                        <SelectTrigger>
                               <SelectValue placeholder="Select size" />
-                            </SelectTrigger>
-                            <SelectContent>
+                        </SelectTrigger>
+                        <SelectContent>
                               <SelectItem value="XS">XS</SelectItem>
                               <SelectItem value="S">S</SelectItem>
                               <SelectItem value="M">M</SelectItem>
@@ -429,25 +429,25 @@ export default function AddItemPage() {
                               <SelectItem value="Free Size">
                                 Free Size
                               </SelectItem>
-                            </SelectContent>
-                          </Select>
+                        </SelectContent>
+                      </Select>
                         </div>
-                      </div>
+                    </div>
 
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="condition">Condition *</Label>
-                          <Select
-                            value={formData.condition}
+                    <div className="space-y-2">
+                      <Label htmlFor="condition">Condition *</Label>
+                      <Select
+                        value={formData.condition}
                             onValueChange={(value) =>
                               handleInputChange("condition", value)
                             }
                             disabled={isLoading}
-                          >
-                            <SelectTrigger>
+                      >
+                        <SelectTrigger>
                               <SelectValue placeholder="Select condition" />
-                            </SelectTrigger>
-                            <SelectContent>
+                        </SelectTrigger>
+                        <SelectContent>
                               <SelectItem value="Like New">Like New</SelectItem>
                               <SelectItem value="Excellent">
                                 Excellent
@@ -458,13 +458,13 @@ export default function AddItemPage() {
                               <SelectItem value="Good">Good</SelectItem>
                               <SelectItem value="Fair">Fair</SelectItem>
                               <SelectItem value="Poor">Poor</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                        <div className="space-y-2">
+                    <div className="space-y-2">
                           <Label htmlFor="brand">Brand</Label>
-                          <Input
+                      <Input
                             id="brand"
                             placeholder="e.g., Levi's, Nike"
                             value={formData.brand}
@@ -472,14 +472,14 @@ export default function AddItemPage() {
                               handleInputChange("brand", e.target.value)
                             }
                             disabled={isLoading}
-                          />
-                        </div>
-                      </div>
+                      />
+                    </div>
+                  </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
                           <Label htmlFor="material">Material</Label>
-                          <Input
+                      <Input
                             id="material"
                             placeholder="e.g., Cotton, Denim, Silk"
                             value={formData.material}
@@ -487,12 +487,12 @@ export default function AddItemPage() {
                               handleInputChange("material", e.target.value)
                             }
                             disabled={isLoading}
-                          />
-                        </div>
+                      />
+                    </div>
 
-                        <div className="space-y-2">
+                    <div className="space-y-2">
                           <Label htmlFor="color">Color</Label>
-                          <Input
+                      <Input
                             id="color"
                             placeholder="e.g., Blue, Black, Red"
                             value={formData.color}
@@ -500,24 +500,24 @@ export default function AddItemPage() {
                               handleInputChange("color", e.target.value)
                             }
                             disabled={isLoading}
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                  <Card>
-                    <CardHeader>
+              <Card>
+                <CardHeader>
                       <CardTitle>Pricing & Location</CardTitle>
                       <CardDescription>
                         Set your price and location
                       </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                </CardHeader>
+                <CardContent className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="price">Price (Points) *</Label>
-                          <Input
+                    <Input
                             id="price"
                             type="number"
                             placeholder="0"
@@ -528,7 +528,7 @@ export default function AddItemPage() {
                             required
                             disabled={isLoading}
                           />
-                        </div>
+                  </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="originalPrice">
@@ -544,8 +544,8 @@ export default function AddItemPage() {
                             }
                             disabled={isLoading}
                           />
-                        </div>
-                      </div>
+                    </div>
+            </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="location">Location</Label>
@@ -558,36 +558,36 @@ export default function AddItemPage() {
                           }
                           disabled={isLoading}
                         />
-                      </div>
-                    </CardContent>
-                  </Card>
+                  </div>
+                </CardContent>
+              </Card>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Listing Guidelines</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                      <div className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                        <p>Use clear, well-lit photos from multiple angles</p>
-                      </div>
-                      <div className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                        <p>Be honest about the item's condition</p>
-                      </div>
-                      <div className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                        <p>Include detailed measurements when possible</p>
-                      </div>
-                      <div className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                        <p>Add relevant tags to increase visibility</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Listing Guidelines</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                    <p>Use clear, well-lit photos from multiple angles</p>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                    <p>Be honest about the item's condition</p>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                    <p>Include detailed measurements when possible</p>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                    <p>Add relevant tags to increase visibility</p>
+                  </div>
+                </CardContent>
+              </Card>
 
-                  {/* Submit */}
-                  <div className="space-y-4">
+              {/* Submit */}
+              <div className="space-y-4">
                     <Button
                       type="submit"
                       className="w-full"
@@ -643,7 +643,7 @@ export default function AddItemPage() {
                       }}
                     >
                       Test Upload (Debug)
-                    </Button>
+                </Button>
 
                     <Button
                       type="button"
@@ -651,14 +651,14 @@ export default function AddItemPage() {
                       className="w-full bg-transparent"
                       disabled={isLoading}
                     >
-                      Save as Draft
-                    </Button>
-                    <p className="text-xs text-muted-foreground text-center">
+                  Save as Draft
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
                       Your item will be reviewed within 24 hours before going
                       live
-                    </p>
-                  </div>
-                </div>
+                </p>
+              </div>
+            </div>
               </div>
             </form>
           </div>

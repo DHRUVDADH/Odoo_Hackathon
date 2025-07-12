@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -33,14 +33,41 @@ import {
   Trash2,
   LogOut,
 } from "lucide-react";
+import { apiClient, Item } from "@/lib/api";
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const { user, logout } = useAuth();
+  const [myItems, setMyItems] = useState<Item[]>([]);
+  const [loadingItems, setLoadingItems] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchMyItems = async () => {
+      setLoadingItems(true);
+      try {
+        const res = await apiClient.getUserItems(user._id);
+        if (res.success && res.data) {
+          setMyItems(res.data.items);
+        }
+      } finally {
+        setLoadingItems(false);
+      }
+    };
+    fetchMyItems();
+  }, [user]);
+
+  // Calculate stats from real approved items
+  const approvedItems = myItems.filter((item) => item.status === "approved");
+  const approvedItemsCount = approvedItems.length;
+  const approvedItemsPoints = approvedItems.reduce(
+    (sum, item) => sum + (item.price || 0),
+    0
+  );
 
   const userStats = {
-    totalPoints: user?.points || 0,
-    itemsListed: user?.stats?.itemsListed || 0,
+    totalPoints: approvedItemsPoints,
+    itemsListed: approvedItemsCount,
     successfulSwaps: user?.stats?.swapsCompleted || 0,
     rating:
       user?.stats?.totalReviews > 0
@@ -56,48 +83,6 @@ export default function UserDashboard() {
         })
       : "Recently",
   };
-
-  const myItems = [
-    {
-      id: 1,
-      title: "Vintage Denim Jacket",
-      category: "Outerwear",
-      condition: "Excellent",
-      points: 45,
-      image: "/placeholder.svg?height=200&width=200",
-      status: "active",
-      views: 24,
-      likes: 8,
-      messages: 3,
-      listedDate: "2 days ago",
-    },
-    {
-      id: 2,
-      title: "Summer Floral Dress",
-      category: "Dresses",
-      condition: "Like New",
-      points: 55,
-      image: "/placeholder.svg?height=200&width=200",
-      status: "pending",
-      views: 18,
-      likes: 12,
-      messages: 5,
-      listedDate: "1 week ago",
-    },
-    {
-      id: 3,
-      title: "Leather Boots",
-      category: "Shoes",
-      condition: "Good",
-      points: 40,
-      image: "/placeholder.svg?height=200&width=200",
-      status: "swapped",
-      views: 31,
-      likes: 15,
-      messages: 8,
-      listedDate: "2 weeks ago",
-    },
-  ];
 
   const swapHistory = [
     {
@@ -377,73 +362,80 @@ export default function UserDashboard() {
 
             <TabsContent value="my-items" className="space-y-6">
               <div className="grid gap-6">
-                {myItems.map((item) => (
-                  <Card key={item.id} className="flex flex-col md:flex-row">
-                    <div className="relative w-full md:w-48 h-48 md:h-auto">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none"
-                      />
-                      <div
-                        className={`absolute top-2 left-2 w-2 h-2 rounded-full ${getStatusColor(
-                          item.status
-                        )}`}
-                      ></div>
-                    </div>
-                    <div className="flex-1 p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-lg font-semibold">
-                            {item.title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {item.category} • {item.condition}
-                          </p>
+                {loadingItems ? (
+                  <p>Loading your items...</p>
+                ) : myItems.length === 0 ? (
+                  <p>No items found.</p>
+                ) : (
+                  myItems.map((item) => (
+                    <Card key={item._id} className="flex flex-col md:flex-row">
+                      <div className="relative w-full md:w-48 h-48 md:h-auto">
+                        <Image
+                          src={item.images[0]?.url || "/placeholder.svg"}
+                          alt={item.title}
+                          fill
+                          className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none"
+                        />
+                        <div
+                          className={`absolute top-2 left-2 w-2 h-2 rounded-full ${getStatusColor(
+                            item.status
+                          )}`}
+                        ></div>
+                      </div>
+                      <div className="flex-1 p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="text-lg font-semibold">
+                              {item.title}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {item.category} • {item.condition}
+                            </p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <p className="font-medium">{item.points}</p>
+                            <p className="text-muted-foreground">Points</p>
+                          </div>
+                          <div>
+                            <p className="font-medium">{item.views}</p>
+                            <p className="text-muted-foreground">Views</p>
+                          </div>
+                          <div>
+                            <p className="font-medium">{item.likes.length}</p>
+                            <p className="text-muted-foreground">Likes</p>
+                          </div>
+                          <div>
+                            <p className="font-medium">{item.messages}</p>
+                            <p className="text-muted-foreground">Messages</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between mt-4">
+                          <span className="text-sm text-muted-foreground">
+                            Listed{" "}
+                            {new Date(item.createdAt).toLocaleDateString()}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className="flex items-center space-x-1"
+                          >
+                            {getStatusIcon(item.status)}
+                            <span className="capitalize">{item.status}</span>
+                          </Badge>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <p className="font-medium">{item.points}</p>
-                          <p className="text-muted-foreground">Points</p>
-                        </div>
-                        <div>
-                          <p className="font-medium">{item.views}</p>
-                          <p className="text-muted-foreground">Views</p>
-                        </div>
-                        <div>
-                          <p className="font-medium">{item.likes}</p>
-                          <p className="text-muted-foreground">Likes</p>
-                        </div>
-                        <div>
-                          <p className="font-medium">{item.messages}</p>
-                          <p className="text-muted-foreground">Messages</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-4">
-                        <span className="text-sm text-muted-foreground">
-                          Listed {item.listedDate}
-                        </span>
-                        <Badge
-                          variant="outline"
-                          className="flex items-center space-x-1"
-                        >
-                          {getStatusIcon(item.status)}
-                          <span className="capitalize">{item.status}</span>
-                        </Badge>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))
+                )}
               </div>
             </TabsContent>
 

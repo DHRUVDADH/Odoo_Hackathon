@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { apiClient, Item } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -23,69 +25,30 @@ import {
 } from "lucide-react";
 
 export default function ProductDetailPage() {
+  const { id } = useParams();
+  const [item, setItem] = useState<Item | null>(null);
+  const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
 
-  const item = {
-    id: 1,
-    title: "Vintage Denim Jacket",
-    description:
-      "This classic blue denim jacket is in excellent condition and perfect for layering. It features a timeless design with button closure, chest pockets, and a comfortable fit. The jacket has been well-maintained and shows minimal signs of wear. Perfect for casual outings or adding a vintage touch to any outfit.",
-    category: "Outerwear",
-    size: "M",
-    condition: "Excellent",
-    points: 45,
-    images: [
-      "/placeholder.svg?height=600&width=600",
-      "/placeholder.svg?height=600&width=600",
-      "/placeholder.svg?height=600&width=600",
-      "/placeholder.svg?height=600&width=600",
-    ],
-    user: {
-      name: "Sarah M.",
-      avatar: "/placeholder.svg?height=60&width=60",
-      rating: 4.8,
-      totalSwaps: 23,
-      joinedDate: "January 2023",
-      location: "New York, NY",
-    },
-    uploadedAt: "2 days ago",
-    views: 124,
-    likes: 18,
-    tags: ["vintage", "denim", "casual", "layering"],
-    measurements: {
-      chest: "42 inches",
-      length: "24 inches",
-      sleeves: "25 inches",
-    },
-    material: "100% Cotton Denim",
-    brand: "Levi's",
-    availability: "Available",
-  };
+  useEffect(() => {
+    if (!id) return;
+    const fetchItem = async () => {
+      setLoading(true);
+      try {
+        const res = await apiClient.getItem(id as string);
+        if (res.success && res.data) {
+          setItem(res.data.item);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchItem();
+  }, [id]);
 
-  const similarItems = [
-    {
-      id: 2,
-      title: "Classic Leather Jacket",
-      points: 65,
-      image: "/placeholder.svg?height=200&width=200",
-      condition: "Very Good",
-    },
-    {
-      id: 3,
-      title: "Wool Peacoat",
-      points: 55,
-      image: "/placeholder.svg?height=200&width=200",
-      condition: "Excellent",
-    },
-    {
-      id: 4,
-      title: "Bomber Jacket",
-      points: 40,
-      image: "/placeholder.svg?height=200&width=200",
-      condition: "Good",
-    },
-  ];
+  if (loading) return <p>Loading item...</p>;
+  if (!item) return <p>Item not found.</p>;
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % item.images.length);
@@ -122,7 +85,7 @@ export default function ProductDetailPage() {
           <div className="space-y-4">
             <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted">
               <Image
-                src={item.images[currentImageIndex] || "/placeholder.svg"}
+                src={item.images[currentImageIndex]?.url || "/placeholder.svg"}
                 alt={item.title}
                 fill
                 className="object-cover"
@@ -179,7 +142,7 @@ export default function ProductDetailPage() {
             {/* Thumbnail Gallery */}
             {item.images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
-                {item.images.map((image, index) => (
+                {item.images.map((img, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
@@ -190,7 +153,7 @@ export default function ProductDetailPage() {
                     }`}
                   >
                     <Image
-                      src={image || "/placeholder.svg"}
+                      src={img?.url || "/placeholder.svg"}
                       alt={`${item.title} ${index + 1}`}
                       width={100}
                       height={100}
@@ -219,9 +182,9 @@ export default function ProductDetailPage() {
                 <div className="text-right">
                   <div className="flex items-center space-x-1 text-2xl font-bold text-primary">
                     <Star className="h-6 w-6 fill-current" />
-                    <span>{item.points}</span>
+                    <span>{item.price}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">points</p>
+                  <p className="text-sm text-muted-foreground">price</p>
                 </div>
               </div>
 
@@ -265,33 +228,38 @@ export default function ProductDetailPage() {
                     <span className="text-muted-foreground">Brand:</span>
                     <p className="font-medium">{item.brand}</p>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">Availability:</span>
-                    <p className="font-medium text-green-600">
-                      {item.availability}
-                    </p>
-                  </div>
+                  {/* Optionally render availability if present */}
+                  {item.status && (
+                    <div>
+                      <span className="text-muted-foreground">Status:</span>
+                      <p className="font-medium text-green-600">
+                        {item.status}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <Separator />
 
-                <div>
-                  <h4 className="font-medium mb-2">Measurements</h4>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
+                {item.measurements &&
+                  typeof item.measurements === "object" &&
+                  Object.keys(item.measurements).length > 0 && (
                     <div>
-                      <span className="text-muted-foreground">Chest:</span>
-                      <p className="font-medium">{item.measurements.chest}</p>
+                      <h4 className="font-medium mb-2">Measurements</h4>
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        {Object.entries(item.measurements).map(
+                          ([key, value]) => (
+                            <div key={key}>
+                              <span className="text-muted-foreground">
+                                {key.charAt(0).toUpperCase() + key.slice(1)}:
+                              </span>
+                              <p className="font-medium">{String(value)}</p>
+                            </div>
+                          )
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">Length:</span>
-                      <p className="font-medium">{item.measurements.length}</p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Sleeves:</span>
-                      <p className="font-medium">{item.measurements.sleeves}</p>
-                    </div>
-                  </div>
-                </div>
+                  )}
 
                 <Separator />
 
@@ -317,29 +285,23 @@ export default function ProductDetailPage() {
                 <div className="flex items-center space-x-4">
                   <Avatar className="h-16 w-16">
                     <AvatarImage
-                      src={item.user.avatar || "/placeholder.svg"}
-                      alt={item.user.name}
+                      src={item.owner?.avatar || "/placeholder.svg"}
+                      alt={item.owner?.username || "User"}
                     />
-                    <AvatarFallback>{item.user.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>
+                      {item.owner?.username?.charAt(0)}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{item.user.name}</h3>
+                    <h3 className="font-semibold text-lg">
+                      {item.owner?.username}
+                    </h3>
                     <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                       <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span>{item.user.rating}</span>
-                      </div>
-                      <span>•</span>
-                      <span>{item.user.totalSwaps} swaps</span>
-                      <span>•</span>
-                      <div className="flex items-center space-x-1">
                         <MapPin className="h-4 w-4" />
-                        <span>{item.user.location}</span>
+                        <span>{item.location}</span>
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Member since {item.user.joinedDate}
-                    </p>
                   </div>
                   <Button variant="outline">View Profile</Button>
                 </div>
@@ -348,15 +310,15 @@ export default function ProductDetailPage() {
 
             {/* Item Stats */}
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-1">
-                  <Package className="h-4 w-4" />
-                  <span>Listed {item.uploadedAt}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Heart className="h-4 w-4" />
-                  <span>{item.likes} likes</span>
-                </div>
+              <div className="flex items-center space-x-1">
+                <Package className="h-4 w-4" />
+                <span>
+                  Listed {new Date(item.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Heart className="h-4 w-4" />
+                <span>{item.likes.length} likes</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Shield className="h-4 w-4" />
@@ -366,51 +328,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Similar Items */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-6">Similar Items</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {similarItems.map((similarItem) => (
-              <Card
-                key={similarItem.id}
-                className="group cursor-pointer hover:shadow-lg transition-all duration-300"
-              >
-                <CardContent className="p-0">
-                  <div className="relative overflow-hidden rounded-t-lg">
-                    <Image
-                      src={similarItem.image || "/placeholder.svg"}
-                      alt={similarItem.title}
-                      width={300}
-                      height={200}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <Badge
-                      className="absolute top-3 left-3"
-                      variant="secondary"
-                    >
-                      {similarItem.condition}
-                    </Badge>
-                  </div>
-
-                  <div className="p-4 space-y-2">
-                    <h3 className="font-semibold group-hover:text-primary transition-colors">
-                      {similarItem.title}
-                    </h3>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-1 text-primary font-semibold">
-                        <Star className="h-4 w-4 fill-current" />
-                        <span>{similarItem.points} pts</span>
-                      </div>
-                      <Button size="sm" variant="outline">
-                        View Item
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        {/* Similar Items section removed for now */}
       </div>
     </div>
   );
