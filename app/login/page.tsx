@@ -1,19 +1,53 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Navbar } from "@/components/navbar"
-import { Recycle, Eye, EyeOff, Mail, Lock } from "lucide-react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Navbar } from "@/components/navbar";
+import { Recycle, Eye, EyeOff, Mail, Lock, AlertCircle } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { login } = useAuth();
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const result = await login(email, password);
+
+      if (result.success) {
+        router.push("/dashboard");
+      } else {
+        setError(result.message);
+      }
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -29,88 +63,124 @@ export default function LoginPage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold">Welcome back</h1>
-              <p className="text-muted-foreground">Sign in to your ReWear account</p>
+              <p className="text-muted-foreground">
+                Sign in to your ReWear account
+              </p>
             </div>
           </div>
 
           <Card className="border-0 shadow-xl">
             <CardHeader className="space-y-1 pb-6">
               <CardTitle className="text-2xl text-center">Sign In</CardTitle>
-              <CardDescription className="text-center">Enter your credentials to access your account</CardDescription>
+              <CardDescription className="text-center">
+                Enter your credentials to access your account
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                    />
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10 pr-10"
+                        required
+                        disabled={isLoading}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoading}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10"
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="remember"
+                      className="rounded border-gray-300"
                     />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </Button>
+                    <Label htmlFor="remember" className="text-sm">
+                      Remember me
+                    </Label>
                   </div>
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <input type="checkbox" id="remember" className="rounded border-gray-300" />
-                  <Label htmlFor="remember" className="text-sm">
-                    Remember me
-                  </Label>
-                </div>
-                <Link href="/forgot-password" className="text-sm text-primary hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
-
-              <Button className="w-full" size="lg" asChild>
-                <Link href="/dashboard">Sign In</Link>
-              </Button>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="lg"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Signing in..." : "Sign In"}
+                </Button>
+              </form>
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <Separator className="w-full" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <Button variant="outline" className="w-full bg-transparent">
+                <Button
+                  variant="outline"
+                  className="w-full bg-transparent"
+                  disabled={isLoading}
+                >
                   <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                     <path
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -131,8 +201,15 @@ export default function LoginPage() {
                   </svg>
                   Google
                 </Button>
-                <Button variant="outline" className="w-full bg-transparent">
-                  <svg className="mr-2 h-4 w-4 fill-current" viewBox="0 0 24 24">
+                <Button
+                  variant="outline"
+                  className="w-full bg-transparent"
+                  disabled={isLoading}
+                >
+                  <svg
+                    className="mr-2 h-4 w-4 fill-current"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>
                   Facebook
@@ -140,8 +217,13 @@ export default function LoginPage() {
               </div>
 
               <div className="text-center text-sm">
-                <span className="text-muted-foreground">Don't have an account? </span>
-                <Link href="/signup" className="text-primary hover:underline font-medium">
+                <span className="text-muted-foreground">
+                  Don't have an account?{" "}
+                </span>
+                <Link
+                  href="/signup"
+                  className="text-primary hover:underline font-medium"
+                >
                   Sign up
                 </Link>
               </div>
@@ -150,5 +232,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
